@@ -38,10 +38,12 @@ template = new world.Castle
 ```
 
 html
+
 ```
-<div template="start'>
+<div template="start">
   <div data-bind="if: loading">
     <h1>Loading</h1>
+  </div>
   <div data-bind="else">
     <p data-bind="text: message"></p>
   </div>
@@ -87,7 +89,7 @@ You can then read and write those properties within your Castle using Get / Set
 
 ```
 @set 'property1', 'bye'
-consoel.log @get('property2')
+console.log @get('property2')
 ```
 
 ## Construction
