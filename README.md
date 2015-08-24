@@ -84,7 +84,10 @@ template = new World.Castle
     ...
 ```
 
-You can then read and write those properties within your Castle using Get / Set
+You can then read and write those properties within your Castle using Get / Set. 
+Of course you can create properties anywhere else within your Castle using Get / Set. 
+The difference is that upon innitialisation of your Castle the properties under `properties` 
+will be immediately evaluated.
 
 ```
 @set 'property1', 'bye'
@@ -223,15 +226,16 @@ You can loop over a template using an array and a subtemplate like this
 The important thing is that the sub-template name must be exactly the same as your array name. 
 Within the subtemplate, if you want to bind to array values, you must prefix those values with `model`
 
-## Set and Get
-You can get and set Castle properties like this
+## Set and Get properties
+You can create, get and set Castle properties like this
 
 ```
 @set 'myProperty', 'hello'
-@get 'myProperty'
+console.log @get('myProperty')    # logs 'hello'
 ```
 
-When you set properties the corresponding template bindings are reevaluated and the view is being updated
+When you set properties the corresponding template bindings are reevaluated and the DOM is being updated accordingly.
+You can use this to create reactive interfaces.
 
 ## toggleProperty
 You can toggle a boolean property like this
@@ -255,5 +259,8 @@ You can hide all other templates except this one
 ```
 
 # Dependencies
-Kingdom needs Jquery and UnderscoreJS
+Kingdom needs Jquery and UnderscoreJS. Underscore is mainly required to be IE8 compatible.
 
+
+# Compatibility
+KingdomJS works in Chrome, Safari, Firefox and IE8-12
