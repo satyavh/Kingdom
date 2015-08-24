@@ -48,6 +48,105 @@ html
 </div>
 ```
 
+## Initialize your Kingdom
+# Kingdom.create(name)
+```
+Kingdom.create 'World'
+```
+
+After that your Kingdom will be named 'World' and everything is namespaced as 'World'.
+You can create as many Kingdoms as you like
+
+## Create a Castle
+# template = new [kingdomName].Castle
+
+A Castle is the model/controller for a template (the view). You create a castle like this. The name is required and refers to the template name as stated in the html
+
+```
+template = new World.Castle
+  name: 'myTemplate'
+  
+  
+<div data-bind="template: myTemplate">
+</div>
+```
+
+## Properties
+By passing in properties when creating your Kingdom, those properties are immediately evaluated in the DOM.
+
+```
+template = new World.Castle
+  name: 'myTemplate'
+  properties:
+    'property1': 'hello'
+    'property2': 'world'
+    ...
+```
+
+You can then read and write those properties within your Castle using Get / Set
+
+```
+@set 'property1', 'bye'
+consoel.log @get('property2')
+```
+
+## Construction
+Everything in the construct function will run (once) upon creating the Castle 
+
+```
+template = new World.Castle
+  name: 'myTemplate'
+  properties:
+    'property1': 'hello'
+    'property2': 'world'
+    ...
+  construct: ->
+    @set 'walls', 'build!'
+```
+
+## Functions
+Within your castle you can define as many functions, which can be called using `@functionName`
+
+```
+template = new World.Castle
+  name: 'myTemplate'
+  properties:
+    'property1': 'hello'
+    'property2': 'world'
+    ...
+  construct: ->
+    @set 'walls', 'build!'    
+  functions:
+    helloWorld: ->
+      console.log @get('property1') + ' ' + @get('property2')
+```
+
+##soldiers
+Soldiers are functions that execute when they get an order. This follows the traditional pub-sub pattern and can be used to communicate between castles. For example, using orders you can order a soldier from another castle
+
+```
+template1 = new world.Castle
+  # name of the template that this castle should bind to
+  name: 'template1'
+  soldiers:
+    'template2.doSomething': (what) ->
+      console.log what
+  construct: ->
+    @order 'template1.attack'
+
+template2 = new world.Castle
+  # name of the template that this castle should bind to
+  name: 'template2'
+  construct: ->
+    @order 'doSomething', 'hello'
+    @order 'attack'
+  soldiers:
+    'attack': ->
+      alert 'attacking!'
+```
+
+Soldiers are automatically namespaced, so in the example you see that the soldier in template1 only listens to orders from template2. Ordering soldiers within a template don't need namespacing (then again, you can just use functions within a template)
+
 ## Supported bindings
 ### attribute bindings
 "disabled", "text", "src", "if", "unless", "array", "href", "id", "value", "height", "width"
@@ -83,7 +182,7 @@ You can do if/else and unless/else like this
 Within bindings you can use mustache bindings like this:
 `img data-bind="src: /t/{{path}}/{{key}}"`
 
-## Loop over template
+## Looping over templates
 You can loop over a template using an array and a subtemplate like this
 
 ```
@@ -103,7 +202,7 @@ You can loop over a template using an array and a subtemplate like this
 The important thing is that the template name must be the same as the array name. 
 Within the subtemplate you must refer to array values by referring and prefixing to `model`
 
-# Set and Get
+## Set and Get
 You can get and set Castle properties like this
 ```
 @set 'myProperty', 'hello'
@@ -112,40 +211,21 @@ You can get and set Castle properties like this
 
 When you set properties the corresponding template bindings are reevaluated and the view is being updated
 
-# toggleProperty
+## toggleProperty
 You can toggle a boolean property like this
 ```
 @toggleProperty 'boolean'
 ```
 
-#soldiers
-Soldiers are functions that execute when they get an order. This follows traditional pub-sub pattern. Use soldiers to communicate between castles. 
-
-```
-template1 = new world.Castle
-  # name of the template that this castle should bind to
-  name: 'template1'
-  soldiers:
-    'template2.doSomething': (what) ->
-      console.log what
-
-template2 = new world.Castle
-  # name of the template that this castle should bind to
-  name: 'template2'
-  construct: ->
-    @order 'doSomething', 'hello'
-```
-
-Soldiers are automatically namespaced, so in the example you see that the soldier in template1 only listens to orders from  template2
-
-# hide template
+## hide template
 You can hide a template like this
 ```
 @hide()
 ```
 
-# show only this template
+## show only this template
 You can hide all other templates except this one
 ```
 @uberCastle()
 ```
+
