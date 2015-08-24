@@ -210,7 +210,7 @@ You can loop over a template using an array and a subtemplate like this
 <div data-bind="array: preload">
   <div data-bind="template: preload">
     <div data-bind="if: model.is_slide">
-      <div data-bind="if: ENV.app.is_mobile">
+      <div data-bind="if: isMobile">
         <div data-bind="background-image: model.medium_image_url"></div>
       <div data-bind="else">
         <div data-bind="background-image: model.large_image_url"></div>
