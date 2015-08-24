@@ -73,7 +73,7 @@ template = new World.Castle
 ```
 
 ## Properties
-By passing in properties when creating your Kingdom, those properties are immediately evaluated in the DOM.
+By passing in properties when creating your Castle, those properties are immediately evaluated in the DOM.
 
 ```
 template = new World.Castle
@@ -133,7 +133,7 @@ template1 = new world.Castle
     'template2.doSomething': (what) ->
       console.log what
   construct: ->
-    @order 'template1.attack'
+    @order 'template2.attack'
 
 template2 = new world.Castle
   # name of the template that this castle should bind to
@@ -146,7 +146,7 @@ template2 = new world.Castle
       alert 'attacking!'
 ```
 
-Soldiers are automatically namespaced, so in the example you see that the soldier in template1 only listens to orders from template2. Ordering soldiers within a template don't need namespacing (then again, you can just use functions within a template)
+Soldiers are automatically namespaced, so in the example you see that the soldier in template1 only listens to orders from template2. Ordering soldiers within a template don't need namespacing (then again, you can just call functions within a template)
 
 ## Supported bindings
 ### attribute bindings
@@ -180,8 +180,28 @@ You can do if/else and unless/else like this
 ```
 
 ## Mustache bindings
-Within bindings you can use mustache bindings like this:
-`img data-bind="src: /t/{{path}}/{{key}}"`
+Within bindings (and only within bindings) you can use mustache bindings like this:
+
+```
+template = new World.Castle
+  name: 'myTemplate'
+  properties:
+    'property1': 'hello'
+    'property2': 'world'
+
+<div data-bind="template: myTemplate">
+  <img data-bind="src: /t/{{property1}}/{{property2}}" />
+</div>
+```
+
+will result in
+
+```
+<div data-bind="template: myTemplate">
+  <img src="/t/hello/world" />
+</div>
+```
+
 
 ## Looping over templates
 You can loop over a template using an array and a subtemplate like this
@@ -200,11 +220,12 @@ You can loop over a template using an array and a subtemplate like this
 </div>
 ```
 
-The important thing is that the template name must be the same as the array name. 
-Within the subtemplate you must refer to array values by referring and prefixing to `model`
+The important thing is that the sub-template name must be exactly the same as your array name. 
+Within the subtemplate, if you want to bind to array values, you must prefix those values with `model`
 
 ## Set and Get
 You can get and set Castle properties like this
+
 ```
 @set 'myProperty', 'hello'
 @get 'myProperty'
@@ -214,18 +235,21 @@ When you set properties the corresponding template bindings are reevaluated and 
 
 ## toggleProperty
 You can toggle a boolean property like this
+
 ```
 @toggleProperty 'boolean'
 ```
 
 ## hide template
 You can hide a template like this
+
 ```
 @hide()
 ```
 
 ## show only this template
 You can hide all other templates except this one
+
 ```
 @uberCastle()
 ```
