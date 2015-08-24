@@ -49,7 +49,7 @@ html
 ```
 
 ## Initialize your Kingdom
-# Kingdom.create(name)
+### Kingdom.create(name)
 ```
 Kingdom.create 'World'
 ```
@@ -58,7 +58,7 @@ After that your Kingdom will be named 'World' and everything is namespaced as 'W
 You can create as many Kingdoms as you like
 
 ## Create a Castle
-# template = new [kingdomName].Castle
+### template = new [kingdomName].Castle
 
 A Castle is the model/controller for a template (the view). You create a castle like this. The name is required and refers to the template name as stated in the html
 
