@@ -1,6 +1,6 @@
 # KingdomJS
 
-Kingdom is a lightweight javascript MVC that supports single and double bindings, template rendering and pub-sub.
+Kingdom is a lightweight javascript MVC that supports single and double bindings, template rendering and pub-sub. It works in all major browsers plus IE8.
 
 ## Getting started
 
