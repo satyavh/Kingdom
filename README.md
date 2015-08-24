@@ -2,9 +2,8 @@
 
 Kingdom is a lightweight javascript MVC that supports single and double bindings, template rendering and pub-sub.
 
-## Get started
+## Getting started
 
-.coffee file
 ```
 Kingdom.create 'world'
 
@@ -230,4 +229,7 @@ You can hide all other templates except this one
 ```
 @uberCastle()
 ```
+
+# Dependencies
+Kingdom needs Jquery and UnderscoreJS
 
