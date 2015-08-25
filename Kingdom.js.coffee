@@ -6,7 +6,7 @@ namespace = (target, name, block) ->
   block target, top
 
 
-class Stable
+class _Stable
   constructor: (@name) ->
 
     # find the castle for the stables
@@ -15,11 +15,13 @@ class Stable
     # this is the template that will be repeated
     @stable = @castle.find('[data-bind="template: ' + @name + '"]').detach()     
 
-  clear: ->
-    # clear the castle of stables
+  _clear: ->
+    # clears the castle of stables
     @castle.empty()
 
-  addStable: (index) ->
+  _addStable: (index) ->
+    # adds a subtemplate to the castle
+
     el = @stable.clone().appendTo(@castle).show()
     el.attr 'data-index', index
     el.attr 'data-model', @name
@@ -48,7 +50,7 @@ class @Castle
     # deploy the properties of this castle
     if inauguration.properties?
       for key, value of inauguration.properties
-        @processData key, value
+        @_processData key, value
 
     # deploy functions of this castle
     if inauguration.functions?
@@ -72,7 +74,7 @@ class @Castle
       @['construct'] = inauguration.construct
       @construct()
 
-    @render()  
+    @_render()  
 
   # make this Castle go stealth
   hide: =>
@@ -83,8 +85,8 @@ class @Castle
     $('.template').hide()
     @castle.show()  
 
-  # find a condition on a property, support subkeys
-  findPropertyValue: (condition) =>
+  # find a condition on a property, supports subkeys
+  _findPropertyValue: (condition) =>
 
     c = condition.split('.')
     property = c[0]
@@ -101,10 +103,10 @@ class @Castle
 
 
   # evaluate a single if
-  evaluateIf: (condition) =>
+  _evaluateIf: (condition) =>
     el = $('[data-bind="if: ' + condition + '"]')
 
-    if @findPropertyValue(condition) is true
+    if @_findPropertyValue(condition) is true
       el.css
         display: 'inline'
       el.parent().find('> [data-bind="else"]').hide()
@@ -113,10 +115,10 @@ class @Castle
       el.parent().find('> [data-bind="else"]').css display: 'inline'
 
   # evaluate  a singleunless
-  evaluateUnless: (condition) =>
+  _evaluateUnless: (condition) =>
     el = $('[data-bind="unless: ' + condition + '"]')
 
-    unless @findPropertyValue(condition) is true  
+    unless @_findPropertyValue(condition) is true  
       el.css
         display: 'inline'
       el.parent().find('> [data-bind="else"]').hide()            
@@ -125,30 +127,23 @@ class @Castle
       el.parent().find('> [data-bind="else"]').css display: 'inline'
 
   # evaluate all unless in the DOM
-  evaluateUnlesses: (condition) =>
+  _evaluateUnlesses: (condition) =>
     $('[data-bind*="unless: "]').each (i, el) =>
 
       [binding, condition] = $(el).data('bind').split(': ')    
 
-      @evaluateUnless condition
+      @_evaluateUnless condition
 
   # evaluate all ifs in the DOM
-  evaluateIfs: (condition) =>
+  _evaluateIfs: (condition) =>
     $('[data-bind*="if: "]').each (i, el) =>
 
       [binding, condition] = $(el).data('bind').split(': ')    
 
-      @evaluateIf condition
+      @_evaluateIf condition
 
-  # render Stables (child templates) based on an array input
-  renderStables: (stableName) =>
-
-    # support models with . - lets not do this for now
-    # sn = stableName.split '.'
-    # if sn.length > 0
-    #   model = Kingdom.unflatten sn[0]
-    # else
-    #   model = @[stableName]
+  # _render Stables (child templates) based on an array input
+  _renderStables: (stableName) =>
 
     return unless @[stableName]?
 
@@ -158,22 +153,20 @@ class @Castle
 
     if stable.length > 0
       stable = stable[0]
-      stable.clear()      
+      stable._clear()      
     else
-      stable = new Stable stableName
+      stable = new _Stable stableName
       @stables.push stable
 
-    # console.log 'render stable', @[stableName].length, stableName
-
-    # append templates
+    # append subtemplates
     for item, i in @get(stableName)
-      el = stable.addStable i
+      el = stable._addStable i
 
-      @applyBindings el
+      @_applyBindings el
 
 
   # apply a single binding to an elemen
-  applyBinding: (el, binding, value) =>
+  _applyBinding: (el, binding, value) =>
 
     if value?
       # check and process mustache bindings in value, or otherwise process value
@@ -182,52 +175,46 @@ class @Castle
       if mustache.test(value)
         value = value.replace mustache, (_, start, val, end) =>
           val = @_parseValue el, val
-          val = @findPropertyValue val        
+          val = @_findPropertyValue val        
       else
         value = @_parseValue el, value
 
-
-    # console.log binding, value, @events.indexOf(binding) > -1
-
-    # custom bindings
+    # supported bindings
     if _.indexOf(@bindings, binding) > -1
       switch binding
         when "disabled"
           if $(el).is 'input', 'button'
-            $(el).prop binding, @findPropertyValue(value)
+            $(el).prop binding, @_findPropertyValue(value)
           else
-            $(el).attr binding, @findPropertyValue(value)
+            $(el).attr binding, @_findPropertyValue(value)
         when "text"
-          $(el).text @findPropertyValue(value)
+          $(el).text @_findPropertyValue(value)
         when "src", "id"
           # if there's a value found, bind that, otherwise bind the string 
-          if @findPropertyValue(value)?
-            $(el).attr binding, @findPropertyValue(value) 
+          if @_findPropertyValue(value)?
+            $(el).attr binding, @_findPropertyValue(value) 
           else
             $(el).attr binding, value
         when "if"
-          @evaluateIf value
+          @_evaluateIf value
         when "unless"
-          @evaluateUnless value
+          @_evaluateUnless value
         when "value"
           #apply a 2-way binding
-          $(el).val(@findPropertyValue(value))
+          $(el).val(@_findPropertyValue(value))
           $(el).keyup (e) =>
-            console.log e.target.value
             @set @[value], e.target.value
         when "array"
-          @renderStables value
+          @_renderStables value
         when "background-image"
           $(el).css
-            'background-image': 'url("' + @findPropertyValue(value) + '")'
+            'background-image': 'url("' + @_findPropertyValue(value) + '")'
         when "height", "width"
           $(el).css
-            binding: @findPropertyValue(value)
+            binding: @_findPropertyValue(value)
 
-    # event bindings
+    # supported event bindings
     if _.indexOf(@events, binding) > -1
-      # console.log   $(el).attr('disabled')? or $(el).prop('disabled')?
-
       $(el).on binding, (e) =>
         e.preventDefault() 
         e.stopPropagation()         
@@ -236,7 +223,7 @@ class @Castle
     # assume everything else is just an attribute binding
     if _.indexOf(@bindings, binding) is -1 and _.indexOf(@events, binding) is -1
       if value?
-        $(el).attr 'data-' + binding, @findPropertyValue(value)
+        $(el).attr 'data-' + binding, @_findPropertyValue(value)
 
   _parseValue: (el, value) ->
     if value?
@@ -248,13 +235,13 @@ class @Castle
         parent = $(el).closest('.template')
         model = parent.data('model')
         index = parent.data('index')
-        console.log model, index
         value = model + '.' + index + '.' + v[1]   
 
     value   
 
+
   # process and apply all template bindings
-  applyBindings: (template) =>
+  _applyBindings: (template) =>
     
     $(template).find('[data-bind]').each (i, el) =>
 
@@ -266,39 +253,45 @@ class @Castle
         [b, value] = binding.split(':')
 
         # push binding to virtual dom
-        @addToDom el, b, value
-        @applyBinding el, b, value
+        @_addToDom el, b, value
+        @_applyBinding el, b, value
 
 
-  addToDom: (el, b, v) ->
-    # add binding sto virtual dom
+
+  _addToDom: (el, b, v) ->
+    # add bindings to virtual dom
     @dom.push
       el: el
       binding: b
       value: v
 
+
   # render and show this castle
-  render: =>
+  _render: =>
     $(document).ready =>
       @castle.show()    
-      @applyBindings @castle
+      @_applyBindings @castle
+
 
   # detach this castle
   detach: =>
     @castle = @castle.detach()
 
+
   # append this castle somewhere
   append: (el) =>
     el.append @castle
+
 
   # destroy this castle
   destroy: =>
     @castle.empty()
     delete @
 
+
   # deploy or change a soldier
   set: (key, value) =>
-    @processData key, value
+    @_processData key, value
 
     # let everyone in the castle know this soldier changed
     @order key, value
@@ -312,18 +305,20 @@ class @Castle
     return unless bindings.length > 0
 
     for bind in bindings
-      @applyBinding bind.el, bind.binding, bind.value
+      @_applyBinding bind.el, bind.binding, bind.value
+
 
   # summon a soldier
   get: (key) =>
-    # return flattened objects unflattened
+    # return _flattened objects _unflattened
     if _.isObject @[key]
-      return Kingdom.unflatten @[key]
+      return Kingdom._unflatten @[key]
 
     @[key]
 
   # using https://github.com/cowboy/jquery-tiny-pubsub for pub-sub here
   jquery = $({})  
+
 
   # toggle a boolean property
   toggleProperty: (key) =>
@@ -333,41 +328,37 @@ class @Castle
 
   orders: {}
 
-  soldier: (order, soldier) ->    
-    # console.log order, soldier
 
+  soldier: (order, soldier) ->    
     # create the order if not yet created
     if !@orders[order]
       @orders[order] = []
 
     # add the soldier
     @orders[order].push soldier
-
-    # console.log 'soldiers', @orders
-
     
-  order: (order, data, namespace = true) ->
-    if namespace
-      order = @name + '.' + order
 
-    # console.log 'order', order
+  order: (soldier, data, namespace = true) ->
+    # by default orders are namespaced to the castle
+    if namespace
+      soldier = @name + '.' + soldier
 
     # return if the order doesn't exist, or there are no soldiers
-    return if !@orders[order] or @orders[order].length < 1
+    return if !@orders[soldier] or @orders[soldier].length < 1
 
     # send the event to all soldiers
-    _.each @orders[order], (soldier) =>
-      soldier.apply @, [data] or []
+    _.each @orders[soldier], (o) =>
+      o.apply @, [data] or []
       return
 
 
   # fire a soldier, meaning he will be eliminated
   dischargeSoldier: (soldier) ->
-    # console.log @orders
-    @orders[soldier]
+    @orders[soldier].pop soldier
 
-  processData: (key, value) ->
-    # attaches key, value to Castle. Flattens objects, transforms arrays with objects to arrays with flattened objects
+
+  _processData: (key, value) ->
+    # attaches key, value to Castle. _flattens objects, transforms arrays with objects to arrays with _flattened objects
 
     if _.isObject value
       # if _.isArray value
@@ -375,7 +366,7 @@ class @Castle
 
       #   for item in value
       #     if _.isObject item
-      #       @[key].push Kingdom.flatten item
+      #       @[key].push Kingdom._flatten item
       #     else
       #       @[key].push item
 
@@ -385,11 +376,11 @@ class @Castle
       if value.length is 0
         @[key] = []
       else
-        @[key] = Kingdom.flatten value
+        @[key] = Kingdom._flatten value
     else
       @[key] = value    
 
-  renderMustaches: (template) ->
+  _renderMustaches: (template) ->
     template = $(template)
 
     mustache = new RegExp "({{)([a-z .]*)(}})", "g"
@@ -407,9 +398,9 @@ class @Castle
       exports.Castle = Castle
       exports.Stable = Stable
 
-  # flattens an object
-  # using http://jsfiddle.net/WSzec/14/, it's supposed to be the fastest way to flatten, unflatten data
-  flatten: (data) ->
+  # _flattens an object
+  # using http://jsfiddle.net/WSzec/14/, it's supposed to be the fastest way to _flatten, _unflatten data
+  _flatten: (data) ->
     result = {}
 
     recurse = (cur, prop) ->
@@ -435,7 +426,7 @@ class @Castle
     recurse data, ''
     result  
 
-  unflatten: (data) ->
+  _unflatten: (data) ->
     'use strict'
     if Object(data) != data or _.isArray(data)
       return data

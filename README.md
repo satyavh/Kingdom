@@ -125,7 +125,7 @@ template = new World.Castle
       console.log @get('property1') + ' ' + @get('property2')
 ```
 
-##soldiers
+## Soldiers
 Soldiers are functions that execute when they get an order. This follows the traditional pub-sub pattern and can be used to communicate between castles. For example, using orders you can order a soldier from another castle
 
 ```
@@ -133,23 +133,35 @@ template1 = new world.Castle
   # name of the template that this castle should bind to
   name: 'template1'
   soldiers:
-    'template2.doSomething': (what) ->
+    'doSomething': (what) ->
       console.log what
   construct: ->
-    @order 'template2.attack'
+    @order 'template2.attack', 'bandits', false
 
 template2 = new world.Castle
   # name of the template that this castle should bind to
   name: 'template2'
   construct: ->
-    @order 'doSomething', 'hello'
+    @order 'template1.doSomething', 'get arms', false
     @order 'attack'
   soldiers:
-    'attack': ->
-      alert 'attacking!'
+    'attack': (what) ->
+      alert 'attacking ' + what + '!'
 ```
 
-Soldiers are automatically namespaced, so in the example you see that the soldier in template1 only listens to orders from template2. Ordering soldiers within a template don't need namespacing (then again, you can just call functions within a template)
+Soldiers are automatically namespaced to the Castle. So the soldier `attack` in template2 is being ordered from template1 as `@prder 'template2.attack'`
+
+## Order
+### order(soldier, data, namespace = true)
+
+See example above. You order a soldier like this:
+```
+@order 'template1.doSomething', 'get arms', false
+```
+
+Orders are automatically namespaced to the template, so if you want to order a soldier in another template you must specify set namespace to `false`, and 
+name your order `'templateName.soldier'`. Ordering soldiers within a template don't need namespacing, it's automatically being added.
+
 
 ## Supported bindings
 ### attribute bindings
@@ -244,14 +256,14 @@ You can toggle a boolean property like this
 @toggleProperty 'boolean'
 ```
 
-## hide template
+## Hide template
 You can hide a template like this
 
 ```
 @hide()
 ```
 
-## show only this template
+## Show only this template
 You can hide all other templates except this one
 
 ```
